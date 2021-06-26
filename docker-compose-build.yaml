@@ -1,0 +1,11 @@
+version: '3'
+services:
+  calculator-build:
+    image: node:12-slim
+    container_name: boat-house-calculator_test-runner
+    volumes:
+      - .:/build
+    working_dir: /build
+    command: bash -c "npm --registry https://registry.npm.taobao.org install  && npm run test" # 使用淘宝镜像
+    # 查看编译容器可用
+    # command: bash -c "npm install && npm run test && tail -f /dev/null" # tail -f /dev/null会阻塞进程，容器不会自动退出，方便我们进入查看容器内信息
