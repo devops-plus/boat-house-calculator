@@ -101,6 +101,32 @@ pipeline {
               }
             }
         }
+
+        // 测试环境部署
+        stage('CD - K8S TEST') {
+            steps {
+                timeout(5) {
+                    input message: '是否部署到测试环境?', ok: '是', submitter: 'admin'
+                }
+                sh "sed -i 's/#{REGISTRY_URL}#/${REGISTRY_URL}/g' kube-deploy-test.yaml"
+                sh "sed -i 's/#{REGISTRY_NS}#/${REGISTRY_NS}/g' kube-deploy-test.yaml"
+                sh "sed -i 's/#{K8S_NAMESPACE}#/${K8S_NAMESPACE_TEST}/g' kube-deploy-test.yaml"
+                kubernetesDeploy configs: 'kube-deploy-test.yaml', deleteResource: false, kubeconfigId: 'minikube', secretName: 'regcred', secretNamespace: 'boathouse-test'
+            }
+        }
+
+        // 测试环境部署
+        stage('CD - K8S Prod') {
+            steps {
+                timeout(5) {
+                    input message: '是否部署到生产环境?', ok: '是', submitter: 'admin'
+                }
+                sh "sed -i 's/#{REGISTRY_URL}#/${REGISTRY_URL}/g' kube-deploy-prod.yaml"
+                sh "sed -i 's/#{REGISTRY_NS}#/${REGISTRY_NS}/g' kube-deploy-prod.yaml"
+                sh "sed -i 's/#{K8S_NAMESPACE}#/${K8S_NAMESPACE_PROD}/g' kube-deploy-prod.yaml"
+                kubernetesDeploy configs: 'kube-deploy-prod.yaml', deleteResource: false, kubeconfigId: 'minikube', secretName: 'regcred', secretNamespace: 'boathouse-prod'
+            }
+        }
         
     }
 }
